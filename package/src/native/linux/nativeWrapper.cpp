@@ -10114,6 +10114,31 @@ ELECTROBUN_EXPORT void setWindowAlwaysOnTop(void* window, bool alwaysOnTop) {
     });
 }
 
+ELECTROBUN_EXPORT void setWindowPassthrough(void* window, bool passthrough) {
+    (void)window;
+    (void)passthrough;
+}
+
+ELECTROBUN_EXPORT void setWindowSkipTaskbar(void* window, bool skip) {
+    (void)window;
+    (void)skip;
+}
+
+ELECTROBUN_EXPORT void setWindowFocusable(void* window, bool focusable) {
+    (void)window;
+    (void)focusable;
+}
+
+ELECTROBUN_EXPORT void setWindowMinimumSize(
+    void* window,
+    double width,
+    double height
+) {
+    (void)window;
+    (void)width;
+    (void)height;
+}
+
 ELECTROBUN_EXPORT bool isWindowAlwaysOnTop(void* window) {
     if (!window) return false;
 

@@ -420,6 +420,7 @@ typedef StatusItemHandler ZigStatusItemHandler;
 
 // Global map to store container views by window handle
 static std::map<HWND, std::unique_ptr<ContainerView>> g_containerViews;
+static std::map<HWND, SIZE> g_windowMinimumSizes;
 static GetMimeType g_getMimeType = nullptr;
 static GetHTMLForWebviewSync g_getHTMLForWebviewSync = nullptr;
 
@@ -4826,6 +4827,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             }
             break;
 
+        case WM_GETMINMAXINFO: {
+            auto minimumSize = g_windowMinimumSizes.find(hwnd);
+            if (minimumSize != g_windowMinimumSizes.end()) {
+                MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
+                info->ptMinTrackSize.x = minimumSize->second.cx;
+                info->ptMinTrackSize.y = minimumSize->second.cy;
+                return 0;
+            }
+            break;
+        }
+
         case WM_INPUT: {
             if (g_isMovingWindow && g_targetWindow) {
                 UINT dwSize = 0;
@@ -5021,6 +5033,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             
             // Clean up container view
             g_containerViews.erase(hwnd);
+            g_windowMinimumSizes.erase(hwnd);
             
             // Clean up window data
             if (data) {
@@ -9605,6 +9618,100 @@ ELECTROBUN_EXPORT void setWindowAlwaysOnTop(NSWindow *window, bool alwaysOnTop) 
             alwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST,
             0, 0, 0, 0,
             SWP_NOMOVE | SWP_NOSIZE);
+    });
+}
+
+ELECTROBUN_EXPORT void setWindowPassthrough(NSWindow *window, bool passthrough) {
+    HWND hwnd = reinterpret_cast<HWND>(window);
+    if (!IsWindow(hwnd)) return;
+
+    MainThreadDispatcher::dispatch_sync([=]() {
+        LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+        if (passthrough) {
+            exStyle |= WS_EX_TRANSPARENT;
+        } else {
+            exStyle &= ~WS_EX_TRANSPARENT;
+        }
+        SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
+        SetWindowPos(
+            hwnd,
+            NULL,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
+                SWP_FRAMECHANGED
+        );
+    });
+}
+
+ELECTROBUN_EXPORT void setWindowSkipTaskbar(NSWindow *window, bool skip) {
+    HWND hwnd = reinterpret_cast<HWND>(window);
+    if (!IsWindow(hwnd)) return;
+
+    MainThreadDispatcher::dispatch_sync([=]() {
+        LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+        if (skip) {
+            exStyle &= ~WS_EX_APPWINDOW;
+            exStyle |= WS_EX_TOOLWINDOW;
+        } else {
+            exStyle &= ~WS_EX_TOOLWINDOW;
+            exStyle |= WS_EX_APPWINDOW;
+        }
+        SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
+        SetWindowPos(
+            hwnd,
+            NULL,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
+                SWP_FRAMECHANGED
+        );
+    });
+}
+
+ELECTROBUN_EXPORT void setWindowFocusable(NSWindow *window, bool focusable) {
+    HWND hwnd = reinterpret_cast<HWND>(window);
+    if (!IsWindow(hwnd)) return;
+
+    MainThreadDispatcher::dispatch_sync([=]() {
+        LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+        if (focusable) {
+            exStyle &= ~WS_EX_NOACTIVATE;
+        } else {
+            exStyle |= WS_EX_NOACTIVATE;
+        }
+        SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
+        SetWindowPos(
+            hwnd,
+            NULL,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
+                SWP_FRAMECHANGED
+        );
+    });
+}
+
+ELECTROBUN_EXPORT void setWindowMinimumSize(
+    NSWindow *window,
+    double width,
+    double height
+) {
+    HWND hwnd = reinterpret_cast<HWND>(window);
+    if (!IsWindow(hwnd)) return;
+
+    MainThreadDispatcher::dispatch_sync([=]() {
+        SIZE minimumSize = {
+            static_cast<LONG>(width),
+            static_cast<LONG>(height),
+        };
+        g_windowMinimumSizes[hwnd] = minimumSize;
     });
 }
 

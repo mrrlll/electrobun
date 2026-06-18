@@ -174,6 +174,22 @@ export const native = (() => {
 				args: [FFIType.ptr, FFIType.bool],
 				returns: FFIType.void,
 			},
+			setWindowPassthrough: {
+				args: [FFIType.ptr, FFIType.bool],
+				returns: FFIType.void,
+			},
+			setWindowSkipTaskbar: {
+				args: [FFIType.ptr, FFIType.bool],
+				returns: FFIType.void,
+			},
+			setWindowFocusable: {
+				args: [FFIType.ptr, FFIType.bool],
+				returns: FFIType.void,
+			},
+			setWindowMinimumSize: {
+				args: [FFIType.ptr, FFIType.f64, FFIType.f64],
+				returns: FFIType.void,
+			},
 			isWindowAlwaysOnTop: {
 				args: [FFIType.ptr],
 				returns: FFIType.bool,
@@ -1086,6 +1102,49 @@ const _ffiImpl = {
 			}
 
 			native_.symbols.setWindowAlwaysOnTop(windowPtr, alwaysOnTop);
+		},
+
+		setWindowPassthrough: (params: {
+			winId: number;
+			passthrough: boolean;
+		}) => {
+			const windowPtr = getWindowPtr(params.winId);
+			if (!windowPtr) {
+				throw `Can't change passthrough. Window no longer exists`;
+			}
+			native_.symbols.setWindowPassthrough(windowPtr, params.passthrough);
+		},
+
+		setWindowSkipTaskbar: (params: { winId: number; skip: boolean }) => {
+			const windowPtr = getWindowPtr(params.winId);
+			if (!windowPtr) {
+				throw `Can't change taskbar visibility. Window no longer exists`;
+			}
+			native_.symbols.setWindowSkipTaskbar(windowPtr, params.skip);
+		},
+
+		setWindowFocusable: (params: { winId: number; focusable: boolean }) => {
+			const windowPtr = getWindowPtr(params.winId);
+			if (!windowPtr) {
+				throw `Can't change focusability. Window no longer exists`;
+			}
+			native_.symbols.setWindowFocusable(windowPtr, params.focusable);
+		},
+
+		setWindowMinimumSize: (params: {
+			winId: number;
+			width: number;
+			height: number;
+		}) => {
+			const windowPtr = getWindowPtr(params.winId);
+			if (!windowPtr) {
+				throw `Can't set minimum size. Window no longer exists`;
+			}
+			native_.symbols.setWindowMinimumSize(
+				windowPtr,
+				params.width,
+				params.height,
+			);
 		},
 
 		isWindowAlwaysOnTop: (params: { winId: number }): boolean => {

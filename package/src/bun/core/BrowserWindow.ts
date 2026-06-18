@@ -335,6 +335,30 @@ export class BrowserWindow<T extends RPCWithTransport = RPCWithTransport> {
 		return ffi.request.setWindowAlwaysOnTop({ winId: this.id, alwaysOnTop });
 	}
 
+	setPassthrough(passthrough: boolean) {
+		this.passthrough = passthrough;
+		return ffi.request.setWindowPassthrough({
+			winId: this.id,
+			passthrough,
+		});
+	}
+
+	setSkipTaskbar(skip: boolean) {
+		return ffi.request.setWindowSkipTaskbar({ winId: this.id, skip });
+	}
+
+	setFocusable(focusable: boolean) {
+		return ffi.request.setWindowFocusable({ winId: this.id, focusable });
+	}
+
+	setMinimumSize(width: number, height: number) {
+		return ffi.request.setWindowMinimumSize({
+			winId: this.id,
+			width,
+			height,
+		});
+	}
+
 	isAlwaysOnTop(): boolean {
 		return ffi.request.isWindowAlwaysOnTop({ winId: this.id });
 	}

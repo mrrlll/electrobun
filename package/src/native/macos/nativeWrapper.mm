@@ -7461,6 +7461,31 @@ extern "C" void setWindowAlwaysOnTop(NSWindow *window, bool alwaysOnTop) {
     });
 }
 
+extern "C" void setWindowPassthrough(NSWindow *window, bool passthrough) {
+    (void)window;
+    (void)passthrough;
+}
+
+extern "C" void setWindowSkipTaskbar(NSWindow *window, bool skip) {
+    (void)window;
+    (void)skip;
+}
+
+extern "C" void setWindowFocusable(NSWindow *window, bool focusable) {
+    (void)window;
+    (void)focusable;
+}
+
+extern "C" void setWindowMinimumSize(
+    NSWindow *window,
+    double width,
+    double height
+) {
+    (void)window;
+    (void)width;
+    (void)height;
+}
+
 extern "C" bool isWindowAlwaysOnTop(NSWindow *window) {
     __block bool result = false;
     dispatch_sync(dispatch_get_main_queue(), ^{

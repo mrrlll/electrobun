@@ -1115,6 +1115,17 @@ const _ffiImpl = {
 			native_.symbols.setWindowPassthrough(windowPtr, params.passthrough);
 		},
 
+		setWebviewPassthrough: (params: {
+			id: number;
+			passthrough: boolean;
+		}) => {
+			const webview = BrowserView.getById(params.id);
+			if (!webview?.ptr) {
+				throw `Can't change passthrough. Webview no longer exists`;
+			}
+			native_.symbols.webviewSetPassthrough(webview.ptr, params.passthrough);
+		},
+
 		setWindowSkipTaskbar: (params: { winId: number; skip: boolean }) => {
 			const windowPtr = getWindowPtr(params.winId);
 			if (!windowPtr) {

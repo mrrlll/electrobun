@@ -337,10 +337,15 @@ export class BrowserWindow<T extends RPCWithTransport = RPCWithTransport> {
 
 	setPassthrough(passthrough: boolean) {
 		this.passthrough = passthrough;
-		return ffi.request.setWindowPassthrough({
+		const result = ffi.request.setWindowPassthrough({
 			winId: this.id,
 			passthrough,
 		});
+		ffi.request.setWebviewPassthrough({
+			id: this.webviewId,
+			passthrough,
+		});
+		return result;
 	}
 
 	setSkipTaskbar(skip: boolean) {
